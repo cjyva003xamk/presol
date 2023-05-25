@@ -6,6 +6,18 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./data.db"
+}
+
+model Journey {
+  id                   Int    @id @default(autoincrement())
+  departure            String
+  return               String
+  departureStationId   Int
+  departureStationName String
+  returnStationId      Int
+  returnStationName    String
+  coveredDistance      Int
+  duration             Int
 }

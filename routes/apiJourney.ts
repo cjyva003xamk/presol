@@ -1,35 +1,69 @@
 import express from "express";
-import multer from "multer";
+import busboy from "busboy";/* 
+import http from "http"; */
+import fs from "fs";
+import { parse } from "csv-parse";
 import path from "path";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Virhe } from "../errors/virhekasittelija";
-/* 
-const prisma: PrismaClient = new PrismaClient(); */
+
+const prisma: PrismaClient = new PrismaClient();
 
 const apiJourneyRouter: express.Router = express.Router();
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "./public/uploads/")
-    },
-    filename:(req, file,cb) => {
-        
-        cb(null, path.extname(file.originalname)+ "-" + Date.now()) 
-    }
+const insertInto = () => {
 
-});
+}
 
-const upload = multer({storage: storage});
+apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-/* apiJourneyRouter.use(express.json());   */
-/* 
-apiJourneyRouter.use(express.urlencoded({ extended: false })); */
+    const added = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+    let savedTo = ""
 
-apiJourneyRouter.post("/", upload.single("uploaded_file1") , async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const bb = busboy({ headers: req.headers });
+    bb.on('file', (name, file, info) => {
+        const { filename, encoding, mimeType } = info;
+        console.log(
+            `File [${name}]: filename: %j, encoding: %j, mimeType: %j`,
+            filename,
+            encoding,
+            mimeType
+        );
+        const saveTo = path.join("./public/uploads", `upload-[${added}]-${filename}`);
+        savedTo = saveTo;
+        file.pipe(fs.createWriteStream(saveTo));
 
-/* console.log(req.file?.filename, req.body);
-res.json(req.headers) */
-    
+        fs.createReadStream(savedTo)
+            .pipe(parse({ delimiter: ',', from_line: 2 }))
+            .on('data', function (row) {
+                if (row[6] < 10 && row[7] == 6) {
+                    console.log(row);
+
+
+
+                }
+            })
+            .on("end", function () {
+                console.log("finished");
+              })
+              .on("error", function (error) {
+                console.log(error.message);
+              });
+    });
+    bb.on('close', () => {
+        res.writeHead(200, { 'Connection': 'close' });
+        res.end(`Data has been successfully uploaded!`);
+    });
+    req.pipe(bb);
+
+
+    return;
+
+
+
+    /* console.log(req.file?.filename, req.body);
+    res.json(req.headers) */
+
     /* console.log(req.file, req.body); */
     /* try {
 

@@ -71,9 +71,9 @@ const AddFile: React.FC = (): React.ReactElement => {
 
                 let options: any = {
                     method: 'POST',
-                    headers: {
+                    /* headers: {
                         "Content-Type": "multipart/form-data"
-                    } ,
+                    } , */
                     body: formData
                 };
 
@@ -93,12 +93,11 @@ const AddFile: React.FC = (): React.ReactElement => {
         }
     }
 
-
     return (
         <Box>
             <Typography><h4>Täällä lisätään tiedostoja tietokantaan</h4></Typography>
-            <Box component={'form'} onSubmit={upload} /* encType= 'multipart/form-data' */ >
-                <input type='file' accept='.csv' ref={lomakeRef} name='uploaded_file1'>
+            <Box component={'form'} onSubmit={upload} >
+                <input type='file' accept='.csv' ref={lomakeRef} name='uploaded_file1' >
                 </input>
                 <Button type='submit'>
                     Lähetä tiedosto
