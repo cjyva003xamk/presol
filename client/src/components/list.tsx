@@ -2,19 +2,16 @@ import React, { useRef, useState } from 'react';
 import { Slider, Alert, Card, CardMedia, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 
-interface Postimerkki {
+interface Journey {
   id: number
-  asiasanat?: string
-  ilmestymispaiva?: string
-  kaytonPaattyminen?: string
-  nimellisarvo?: number
-  merkinNimi?: string
-  merkinVari?: string
-  painopaikka?: string
-  painosmaara: number
-  taiteilija?: string
-  valuutta?: string
-  kuvanUrl?: string
+  departure: string
+  return: string
+  departureStationId: number
+  departureStationName: string
+  returnStationId: number
+  returnStationName: string
+  coveredDistance: number
+  duration: number
 }
 
 const Listing: React.FC = (): React.ReactElement => {
@@ -42,11 +39,10 @@ const Listing: React.FC = (): React.ReactElement => {
 
     e.preventDefault();
 
-    if (lomakeRef.current.hakusana.value.length > 1) {
 
       try {
 
-        let url: string = `/api/merkit?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}`;
+        let url: string = `/api/journeys`;
 
         const yhteys = await fetch(url);
 
@@ -62,9 +58,7 @@ const Listing: React.FC = (): React.ReactElement => {
       } catch (e: any) {
         setVirhe("Palvelimelle ei saada yhteyttä.")
       }
-    } else {
-      setVirhe("Hakusanan tulee olla vähintään kaksi merkkiä pitkä.");
-    }
+    
   }
 
   const kaynnistaSliderHaku = async (e: React.FormEvent): Promise<void> => {
@@ -92,7 +86,7 @@ const Listing: React.FC = (): React.ReactElement => {
         setVirhe("Palvelimelle ei saada yhteyttä.")
       }
     } else {
-      setVirhe("Hakusanan tulee olla vähintään kaksi merkkiä pitkä.");
+      setVirhe("Hakusanan tulee olla vähintään kaksi journeyä pitkä.");
     }
   }
 
@@ -172,24 +166,16 @@ const Listing: React.FC = (): React.ReactElement => {
       </Container>
       {(Boolean(virhe))
         ? <Alert severity="error">{virhe}</Alert>
-        : merkit.length ? <Grid container sx={{marginTop:5}} spacing={2}>{merkit.map((merkki: Postimerkki, idx: number) => {
+        : merkit.length ? <Grid container sx={{marginTop:5}} spacing={2}>{merkit.map((journey: Journey, idx: number) => {
           idx++; if (idx < 41) {
             return <Grid item lg={3} sx={{ boxShadow: 1, padding: 1 }}>
-              Merkin nimi on "{merkki.merkinNimi}" {merkki.taiteilija ? "taiteillut: " + merkki.taiteilija : null}, painettu yhteensä {merkki.painosmaara} kListingaletta,
-              nimellisarvoltaan {merkki.nimellisarvo} {merkki.valuutta}a, julkaistu {merkki.ilmestymispaiva}
-              <Card sx={{ maxWidth: 50 }}>
-                <CardMedia component={"img"}
-                  image={merkki.kuvanUrl}
-                  alt='merkki.merkinNimi'
-                  height={50}
-                >
-
-                </CardMedia>
-              </Card>
+              Matka lähti {journey.departureStationName}, matka kesti {journey.duration} sekuntia ka oli pituudeltaan {journey.coveredDistance}m,
+              päätepysäkki oli {journey.returnStationName}
+              
             </Grid>
-          } else { return <Typography variant='h6'>Haulla löytyi yli 40 postimerkkiä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
+          } else { return <Typography variant='h6'>Haulla löytyi yli 40 Journeyä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
         })}</Grid> :
-          <Alert severity='info'>Hakusanalla {lomakeRef.current?.hakusana.value} ei löytynyt yhtään postimerkkiä</Alert>
+          <Alert severity='info'>Hakusanalla {lomakeRef.current?.hakusana.value} ei löytynyt yhtään Journeyä</Alert>
       }
 
     </Container>

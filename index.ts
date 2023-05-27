@@ -16,6 +16,8 @@ app.use(cors());
 
 app.use("/api/newfile", apiJourneyRouter);
 
+app.use("/api/journeys", apiJourneyRouter);
+
 app.use(virhekasittelija);
 
 app.use((req : express.Request, res : express.Response, next : express.NextFunction) => {
