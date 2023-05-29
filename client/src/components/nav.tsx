@@ -56,6 +56,15 @@ const Navi: React.FC = (): React.ReactElement => {
                 >
                     <h4>Lisää uusi</h4>
                 </Button> 
+                <Button
+                    variant="contained"
+                    size="medium"
+                    sx={{ opacity: '0.8', borderRadius: 100, margin: 0.5, minWidth: '116px' }}
+                    component={Link}
+                    to="/stations"
+                >
+                    < h4 style={{ wordBreak: 'break-word', hyphens: 'auto' }}>Asemat</h4>
+                </Button>
             </Tabs>
         </Box>
     );

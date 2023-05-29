@@ -1,6 +1,5 @@
 import express from "express";
-import busboy from "busboy";/* 
-import http from "http"; */
+import busboy from "busboy";
 import fs from "fs";
 import { parse } from "csv-parse";
 import path from "path";
@@ -12,10 +11,6 @@ const prisma: PrismaClient = new PrismaClient();
 const apiJourneyRouter: express.Router = express.Router();
 
 apiJourneyRouter.use(express.json());
-
-const insertInto = () => {
-
-}
 
 apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
@@ -38,9 +33,9 @@ apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, n
         const dbConnection = fs.createReadStream(savedTo)
         dbConnection.pipe(parse({ delimiter: ',', from_line: 2 }))
             .on('data', async function (row) {
-                if (row[6] < 10 && row[7] == 6) {
+                if (row[6] > 10 && row[7] > 10) {
                     await prisma.journey.create({
-                        data: {
+                       data: {
                             departure: row[0],
                             return: row[1],
                             departureStationId: Number(row[2]),
@@ -50,7 +45,7 @@ apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, n
                             coveredDistance: Number(row[6]),
                             duration: Number(row[7]),
                         },
-                    });
+                    }); 
                 }
             })
             .on("end", function () {
@@ -70,47 +65,95 @@ apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, n
 
 apiJourneyRouter.get("/slider", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-    /* try {
+    try {
 
-        if (typeof req.query.hakusana === "string" && String(req.query.hakusana).length > 0 && typeof req.query.haettava === "string" && String(req.query.haettava).length > 0) {
-
-            let hakusana: string = `% ${req.query.hakusana} %`;
-            let hakusana2: string = `% ${req.query.hakusana}`;
-            let hakusana3: string = `${req.query.hakusana} %`;
+        if (typeof req.query.hakusana === "string" && String(req.query.hakusana).length > 0) {
+            let hakusana: string = `%${req.query.hakusana}%`;
             let haettava: string = String(req.query.haettava);
             let alaraja: number = Number(req.query.alaraja);
             let ylaraja: number = Number(req.query.ylaraja);
 
-            let merkit = await prisma.$queryRaw`SELECT * FROM postimerkki WHERE
-                ${(haettava === "asiasanat") ? Prisma.sql` asiasanat LIKE ${hakusana} AND pvm BETWEEN ${alaraja} AND ${ylaraja} OR asiasanat LIKE ${hakusana2} AND pvm BETWEEN ${alaraja} AND ${ylaraja}  OR 
-                asiasanat LIKE ${hakusana3} AND pvm BETWEEN ${alaraja} AND ${ylaraja} ` :
-                    (haettava === "taiteilija") ? Prisma.sql` taiteilija LIKE ${hakusana} AND pvm BETWEEN ${alaraja} AND ${ylaraja}  OR taiteilija LIKE ${hakusana2} AND pvm BETWEEN ${alaraja} AND ${ylaraja}  OR 
-                    taiteilija LIKE ${hakusana3} AND pvm BETWEEN ${alaraja} AND ${ylaraja} ` :
-                        (haettava === "merkinNimi") ? Prisma.sql` merkinNimi LIKE ${hakusana} AND pvm BETWEEN ${alaraja} AND ${ylaraja}  OR merkinNimi LIKE ${hakusana2} AND pvm BETWEEN ${alaraja} AND ${ylaraja}  OR 
-                        merkinNimi LIKE ${hakusana3} AND pvm BETWEEN ${alaraja} AND ${ylaraja} ` :
-                            Prisma.empty
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey WHERE
+                ${(haettava === "departureStation") ? Prisma.sql` departureStationName LIKE ${hakusana} AND coveredDistance BETWEEN ${alaraja} AND ${ylaraja}` :
+                    (haettava === "returnStation") ? Prisma.sql` returnStationName LIKE ${hakusana} AND coveredDistance BETWEEN ${alaraja} AND ${ylaraja}` :
+                        Prisma.empty
                 }
                                                     
                                                     LIMIT 41`;
 
             res.json(merkit);
-
         } else {
-            next(new Virhe(400))
+            let alaraja: number = Number(req.query.alaraja);
+            let ylaraja: number = Number(req.query.ylaraja);
+
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey WHERE coveredDistance BETWEEN ${alaraja} AND ${ylaraja}
+                                                    
+                                                    LIMIT 41`;
+
+            res.json(merkit);
         }
+
+
 
     } catch (e: any) {
         next(new Virhe());
-    } */
+    }
 
 });
 
 apiJourneyRouter.get("/", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     try {
-        let journeys = await prisma.$queryRaw`SELECT * FROM journey 
+
+        if (typeof req.query.hakusana === "string" && String(req.query.hakusana).length > 0) {
+            let hakusana: string = `%${req.query.hakusana}%`;
+            let haettava: string = String(req.query.haettava);
+
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey WHERE
+                ${(haettava === "departureStation") ? Prisma.sql` departureStationName LIKE ${hakusana}` :
+                    (haettava === "returnStation") ? Prisma.sql` returnStationName LIKE ${hakusana}` :
+                        Prisma.empty
+                }
+                                                    
                                                     LIMIT 41`;
-        res.json(journeys);
+
+            res.json(merkit);
+        } else {
+
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey
+                                                    
+                                                    LIMIT 41`;
+
+            res.json(merkit);
+        }
+    } catch (e: any) {
+        next(new Virhe());
+    }
+
+});
+
+apiJourneyRouter.get("/stations", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+    try {
+
+        if (typeof req.query.hakusana === "string" && String(req.query.hakusana).length > 0) {
+            let hakusana: string = `%${req.query.hakusana}%`;
+
+            let stations = await prisma.$queryRaw`SELECT DISTINCT departureStationName FROM journey  
+            WHERE departureStationName LIKE ${hakusana}                                       
+            ORDER BY departureStationName asc `;
+
+            res.json(stations);
+        } else {
+
+            let stations = await prisma.$queryRaw`SELECT DISTINCT departureStationName FROM journey                                         
+            ORDER BY departureStationName asc `;
+
+            res.json(stations);
+        }
+
+
+
     } catch (e: any) {
         next(new Virhe());
     }

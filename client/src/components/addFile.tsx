@@ -19,48 +19,13 @@ interface Journey {
 const AddFile: React.FC = (): React.ReactElement => {
 
     const lomakeRef = useRef<any>();
-    const [merkit, setmerkit] = useState<any[]>([]);
     const [virhe, setVirhe] = useState<string>("");
-
-  
-
-    const handleUpload = async (e: React.FormEvent): Promise<void> => {
-
-        e.preventDefault();
-        /* 
-            if (lomakeRef.current.hakusana.value.length > 1) {
-        
-              try {
-        
-                let url: string = `/api/merkit/slider?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}&alaraja=${value[0]}&ylaraja=${value[1]}`;
-        
-                const yhteys = await fetch(url);
-        
-                if (yhteys.ok) {
-                  setmerkit(await yhteys.json());
-                  setVirhe("");
-                } else {
-                  switch (yhteys.status) {
-                    case 400: setVirhe("Virheellinen hakusana"); break;
-                    default: setVirhe("Palvelimella tapahtui odottamaton virhe"); break;
-                  }
-                }
-              } catch (e: any) {
-                setVirhe("Palvelimelle ei saada yhteyttä.")
-              }
-            } else {
-              setVirhe("Hakusanan tulee olla vähintään kaksi merkkiä pitkä.");
-            } */
-        console.log("Tiedosto lisätty")
-    }
 
     const upload = async (e: React.FormEvent): Promise<void> => {
 
         const formData = new FormData();
         formData.append('uploaded_file1', lomakeRef.current.files[0]);
 
-        /* 
-            ${ lomakeRef.current.hakusana.value }& haettava=${ lomakeRef.current.haettava.value } */
         setVirhe("");
         e.preventDefault();
         if ( lomakeRef.current.files[0] ) {
@@ -71,9 +36,6 @@ const AddFile: React.FC = (): React.ReactElement => {
 
                 let options: any = {
                     method: 'POST',
-                    /* headers: {
-                        "Content-Type": "multipart/form-data"
-                    } , */
                     body: formData
                 };
 

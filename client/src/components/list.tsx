@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Slider, Alert, Card, CardMedia, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
+import { Link } from 'react-router-dom';
 
 interface Journey {
   id: number
@@ -21,7 +22,7 @@ const Listing: React.FC = (): React.ReactElement => {
   const [virhe, setVirhe] = useState<string>("");
   const [sliderhaku, setSliderhaku] = useState<boolean>(false);
   const [expand, setExpand] = useState(false);
-  const [value, setValue] = React.useState<number[]>([1855, 2021]);
+  const [value, setValue] = React.useState<number[]>([0, 10000]);
 
 
   const handleChange = (event: Event, newValue: number | number[]) => {
@@ -39,10 +40,9 @@ const Listing: React.FC = (): React.ReactElement => {
 
     e.preventDefault();
 
-
       try {
 
-        let url: string = `/api/journeys`;
+        let url: string = `/api/journeys?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}`;
 
         const yhteys = await fetch(url);
 
@@ -65,11 +65,10 @@ const Listing: React.FC = (): React.ReactElement => {
 
     e.preventDefault();
 
-    if (lomakeRef.current.hakusana.value.length > 1) {
-
+   
       try {
 
-        let url: string = `/api/merkit/slider?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}&alaraja=${value[0]}&ylaraja=${value[1]}`;
+        let url: string = `/api/journeys/slider?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}&alaraja=${value[0]}&ylaraja=${value[1]}`;
 
         const yhteys = await fetch(url);
 
@@ -85,9 +84,7 @@ const Listing: React.FC = (): React.ReactElement => {
       } catch (e: any) {
         setVirhe("Palvelimelle ei saada yhteyttä.")
       }
-    } else {
-      setVirhe("Hakusanan tulee olla vähintään kaksi journeyä pitkä.");
-    }
+    
   }
 
 
@@ -95,8 +92,7 @@ const Listing: React.FC = (): React.ReactElement => {
     <Container>
       <Container>
 
-
-        <Typography variant="h6" sx={{ marginBottom: 2 }}>Listaus tietokannasta löytyvistä tietueista</Typography>
+        <Typography variant="h6" sx={{ marginBottom: 2 }}>Listaus kaikista tietokannasta löytyvistä journeystä</Typography>
 
         <Paper
           component="form"
@@ -137,11 +133,10 @@ const Listing: React.FC = (): React.ReactElement => {
               <RadioGroup
                 row
                 name="haettava"
-                defaultValue={"asiasanat"}
+                defaultValue={"departureStation"}
               >
-                <FormControlLabel value="asiasanat" control={<Radio />} label="Asiasanat" />
-                <FormControlLabel value="merkinNimi" control={<Radio />} label="Merkin nimi" />
-                <FormControlLabel value="taiteilija" control={<Radio />} label="Taiteilija" />
+                <FormControlLabel value="departureStation" control={<Radio />} label="departure station" />
+                <FormControlLabel value="returnStation" control={<Radio />} label="Return station" />
               </RadioGroup>
             </FormControl>
 
@@ -150,15 +145,15 @@ const Listing: React.FC = (): React.ReactElement => {
         </Paper>
 
         <Paper>
-          <Button onClick={sliderhakupaalle} sx={{ width: '100%' }} variant={'contained'}>{expand ? "Ota vuosirajaus pois käytöstä" : "Ota vuosirajaus käyttöön"}<span>{expand ? <ArrowDropUp /> : <ArrowDropDown />}</span></Button>
+          <Button onClick={sliderhakupaalle} sx={{ width: '100%' }} variant={'contained'}>{expand ? "Ota matkarajaus pois käytöstä" : "Ota matkarajaus käyttöön"}<span>{expand ? <ArrowDropUp /> : <ArrowDropDown />}</span></Button>
           {expand &&
             <Stack>
               <Slider
                 value={value}
                 onChange={handleChange}
                 valueLabelDisplay="auto"
-                min={1855}
-                max={2021}
+                min={0}
+                max={10000}
               />
             </Stack>}
 
@@ -168,14 +163,14 @@ const Listing: React.FC = (): React.ReactElement => {
         ? <Alert severity="error">{virhe}</Alert>
         : merkit.length ? <Grid container sx={{marginTop:5}} spacing={2}>{merkit.map((journey: Journey, idx: number) => {
           idx++; if (idx < 41) {
-            return <Grid item lg={3} sx={{ boxShadow: 1, padding: 1 }}>
-              Matka lähti {journey.departureStationName}, matka kesti {journey.duration} sekuntia ka oli pituudeltaan {journey.coveredDistance}m,
+            return <Grid item xs={12} lg={3} sx={{ boxShadow: 1, padding: 1, marginBottom:2, bgcolor:'lightgray', }}>
+              Matka lähti asemalta {journey.departureStationName}, matka kesti {journey.duration/60} minuuttia, ja oli pituudeltaan {journey.coveredDistance/1000} kilometriä,
               päätepysäkki oli {journey.returnStationName}
               
             </Grid>
-          } else { return <Typography variant='h6'>Haulla löytyi yli 40 Journeyä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
+          } else { return <Typography variant='h6'>Haulla löytyi yli 40 Journeytä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
         })}</Grid> :
-          <Alert severity='info'>Hakusanalla {lomakeRef.current?.hakusana.value} ei löytynyt yhtään Journeyä</Alert>
+          <Alert severity='info'>Suorita uusi haku</Alert>
       }
 
     </Container>
