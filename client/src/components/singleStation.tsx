@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Slider, Alert, Card, CardMedia, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
-import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
+import { Alert, Container, Grid, Typography } from '@mui/material';
 
 interface Journey {
   id: number
@@ -19,10 +18,6 @@ const SingleStation: React.FC = (): React.ReactElement => {
   const lomakeRef = useRef<any>();
   const [merkit, setmerkit] = useState<any[]>([]);
   const [virhe, setVirhe] = useState<string>("");
-
-
-  
-  
 
   const kaynnistaHaku = async (e: React.FormEvent): Promise<void> => {
 
@@ -70,7 +65,7 @@ const SingleStation: React.FC = (): React.ReactElement => {
             </Grid>
           } else { return <Typography variant='h6'>Haulla löytyi yli 40 Journeyä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
         })}</Grid> :
-          <Alert severity='info'>Jotain meni vikaan</Alert>
+          <Alert severity='info'>To be implemented..</Alert>
       }
 
     </Container>

@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Slider, Alert, Card, CardMedia, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
-import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
+import { Alert, Button, Container, Grid, Typography, Paper, Stack, TextField } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 interface Journey {
@@ -86,7 +85,7 @@ const Stations: React.FC = (): React.ReactElement => {
                         </Grid>
                     </Stack>
                 </Paper>
-               
+
             </Container>
             {(Boolean(virhe))
                 ? <Alert severity="error">{virhe}</Alert>

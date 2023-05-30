@@ -31,21 +31,23 @@ apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, n
         file.pipe(fs.createWriteStream(saveTo));
         console.log("luettava tiedosto on: " + savedTo)
         const dbConnection = fs.createReadStream(savedTo)
-        dbConnection.pipe(parse({ delimiter: ',', from_line: 2 }))
+        dbConnection.pipe(parse({ delimiter: ',', from_line: 2, to_line: 20000 }))
             .on('data', async function (row) {
                 if (row[6] > 10 && row[7] > 10) {
-                    await prisma.journey.create({
-                       data: {
-                            departure: row[0],
-                            return: row[1],
-                            departureStationId: Number(row[2]),
-                            departureStationName: row[3],
-                            returnStationId: Number(row[4]),
-                            returnStationName: row[5],
-                            coveredDistance: Number(row[6]),
-                            duration: Number(row[7]),
-                        },
-                    }); 
+                    try {
+                        await prisma.journey.create({
+                            data: {
+                                departure: row[0],
+                                return: row[1],
+                                departureStationId: Number(row[2]),
+                                departureStationName: row[3],
+                                returnStationId: Number(row[4]),
+                                returnStationName: row[5],
+                                coveredDistance: Number(row[6]),
+                                duration: Number(row[7]),
+                            },
+                        })
+                    } catch (e: any) { console.log(e), prisma.$disconnect() };
                 }
             })
             .on("end", function () {
@@ -53,6 +55,9 @@ apiJourneyRouter.post("/", async (req: express.Request, res: express.Response, n
             })
             .on("error", function (error) {
                 console.log(error.message);
+            })
+            .on("close", function () {
+                console.log("Finished reading file")
             });
     });
     bb.on('close', () => {
@@ -77,24 +82,17 @@ apiJourneyRouter.get("/slider", async (req: express.Request, res: express.Respon
                 ${(haettava === "departureStation") ? Prisma.sql` departureStationName LIKE ${hakusana} AND coveredDistance BETWEEN ${alaraja} AND ${ylaraja}` :
                     (haettava === "returnStation") ? Prisma.sql` returnStationName LIKE ${hakusana} AND coveredDistance BETWEEN ${alaraja} AND ${ylaraja}` :
                         Prisma.empty
-                }
-                                                    
+                }                                                    
                                                     LIMIT 41`;
-
             res.json(merkit);
         } else {
             let alaraja: number = Number(req.query.alaraja);
             let ylaraja: number = Number(req.query.ylaraja);
 
-            let merkit = await prisma.$queryRaw`SELECT * FROM journey WHERE coveredDistance BETWEEN ${alaraja} AND ${ylaraja}
-                                                    
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey WHERE coveredDistance BETWEEN ${alaraja} AND ${ylaraja}                                                    
                                                     LIMIT 41`;
-
             res.json(merkit);
         }
-
-
-
     } catch (e: any) {
         next(new Virhe());
     }
@@ -113,30 +111,24 @@ apiJourneyRouter.get("/", async (req: express.Request, res: express.Response, ne
                 ${(haettava === "departureStation") ? Prisma.sql` departureStationName LIKE ${hakusana}` :
                     (haettava === "returnStation") ? Prisma.sql` returnStationName LIKE ${hakusana}` :
                         Prisma.empty
-                }
-                                                    
+                }                                                    
                                                     LIMIT 41`;
-
             res.json(merkit);
         } else {
-
-            let merkit = await prisma.$queryRaw`SELECT * FROM journey
-                                                    
+            let merkit = await prisma.$queryRaw`SELECT * FROM journey                                                    
                                                     LIMIT 41`;
-
             res.json(merkit);
         }
     } catch (e: any) {
         next(new Virhe());
     }
-
 });
 
 apiJourneyRouter.get("/stations", async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     try {
-
         if (typeof req.query.hakusana === "string" && String(req.query.hakusana).length > 0) {
+
             let hakusana: string = `%${req.query.hakusana}%`;
 
             let stations = await prisma.$queryRaw`SELECT DISTINCT departureStationName FROM journey  
@@ -145,19 +137,14 @@ apiJourneyRouter.get("/stations", async (req: express.Request, res: express.Resp
 
             res.json(stations);
         } else {
-
             let stations = await prisma.$queryRaw`SELECT DISTINCT departureStationName FROM journey                                         
             ORDER BY departureStationName asc `;
 
             res.json(stations);
         }
-
-
-
     } catch (e: any) {
         next(new Virhe());
     }
-
 });
 
 export default apiJourneyRouter;

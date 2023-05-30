@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Slider, Alert, Card, CardMedia, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
+import { Slider, Alert, Button, Container, FormControl, FormLabel, FormControlLabel, RadioGroup, Grid, Radio, Typography, Paper, Stack, TextField } from '@mui/material';
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
-import { Link } from 'react-router-dom';
 
 interface Journey {
   id: number
@@ -24,7 +23,6 @@ const Listing: React.FC = (): React.ReactElement => {
   const [expand, setExpand] = useState(false);
   const [value, setValue] = React.useState<number[]>([0, 10000]);
 
-
   const handleChange = (event: Event, newValue: number | number[]) => {
     setValue(newValue as number[]);
   };
@@ -32,61 +30,55 @@ const Listing: React.FC = (): React.ReactElement => {
   const sliderhakupaalle = () => {
     setExpand((prevExpand) => !prevExpand);
     setSliderhaku((prevSliderhaku) => !prevSliderhaku);
-    
   }
-  
 
   const kaynnistaHaku = async (e: React.FormEvent): Promise<void> => {
 
     e.preventDefault();
 
-      try {
+    try {
 
-        let url: string = `/api/journeys?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}`;
+      let url: string = `/api/journeys?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}`;
 
-        const yhteys = await fetch(url);
+      const yhteys = await fetch(url);
 
-        if (yhteys.ok) {
-          setmerkit(await yhteys.json());
-          setVirhe("");
-        } else {
-          switch (yhteys.status) {
-            case 400: setVirhe("Virheellinen hakusana"); break;
-            default: setVirhe("Palvelimella tapahtui odottamaton virhe"); break;
-          }
+      if (yhteys.ok) {
+        setmerkit(await yhteys.json());
+        setVirhe("");
+      } else {
+        switch (yhteys.status) {
+          case 400: setVirhe("Virheellinen hakusana"); break;
+          default: setVirhe("Palvelimella tapahtui odottamaton virhe"); break;
         }
-      } catch (e: any) {
-        setVirhe("Palvelimelle ei saada yhteyttä.")
       }
-    
+    } catch (e: any) {
+      setVirhe("Palvelimelle ei saada yhteyttä.")
+    }
   }
 
   const kaynnistaSliderHaku = async (e: React.FormEvent): Promise<void> => {
 
     e.preventDefault();
 
-   
-      try {
+    try {
+      
+      let url: string = `/api/journeys/slider?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}&alaraja=${value[0]}&ylaraja=${value[1]}`;
 
-        let url: string = `/api/journeys/slider?hakusana=${lomakeRef.current.hakusana.value}&haettava=${lomakeRef.current.haettava.value}&alaraja=${value[0]}&ylaraja=${value[1]}`;
+      const yhteys = await fetch(url);
 
-        const yhteys = await fetch(url);
-
-        if (yhteys.ok) {
-          setmerkit(await yhteys.json());
-          setVirhe("");
-        } else {
-          switch (yhteys.status) {
-            case 400: setVirhe("Virheellinen hakusana"); break;
-            default: setVirhe("Palvelimella tapahtui odottamaton virhe"); break;
-          }
+      if (yhteys.ok) {
+        setmerkit(await yhteys.json());
+        setVirhe("");
+      } else {
+        switch (yhteys.status) {
+          case 400: setVirhe("Virheellinen hakusana"); break;
+          default: setVirhe("Palvelimella tapahtui odottamaton virhe"); break;
         }
-      } catch (e: any) {
-        setVirhe("Palvelimelle ei saada yhteyttä.")
       }
-    
+    } catch (e: any) {
+      setVirhe("Palvelimelle ei saada yhteyttä.")
+    }
   }
-
 
   return (
     <Container>
@@ -96,7 +88,7 @@ const Listing: React.FC = (): React.ReactElement => {
 
         <Paper
           component="form"
-          onSubmit={sliderhaku? kaynnistaSliderHaku : kaynnistaHaku}
+          onSubmit={sliderhaku ? kaynnistaSliderHaku : kaynnistaHaku}
           ref={lomakeRef}
           elevation={2}
           sx={{ padding: 2, marginBottom: 2 }}
@@ -161,12 +153,12 @@ const Listing: React.FC = (): React.ReactElement => {
       </Container>
       {(Boolean(virhe))
         ? <Alert severity="error">{virhe}</Alert>
-        : merkit.length ? <Grid container sx={{marginTop:5}} spacing={2}>{merkit.map((journey: Journey, idx: number) => {
+        : merkit.length ? <Grid container sx={{ marginTop: 5 }} spacing={2}>{merkit.map((journey: Journey, idx: number) => {
           idx++; if (idx < 41) {
-            return <Grid item xs={12} lg={3} sx={{ boxShadow: 1, padding: 1, marginBottom:2, bgcolor:'lightgray', }}>
-              Matka lähti asemalta {journey.departureStationName}, matka kesti {journey.duration/60} minuuttia, ja oli pituudeltaan {journey.coveredDistance/1000} kilometriä,
+            return <Grid item xs={12} lg={3} sx={{ boxShadow: 1, padding: 1, marginBottom: 2, bgcolor: 'lightgray', }}>
+              Matka lähti asemalta {journey.departureStationName}, matka kesti {(journey.duration / 60).toFixed(2)} minuuttia, ja oli pituudeltaan {journey.coveredDistance / 1000} kilometriä,
               päätepysäkki oli {journey.returnStationName}
-              
+
             </Grid>
           } else { return <Typography variant='h6'>Haulla löytyi yli 40 Journeytä, näytetään vain ensimmäiset 40. Ole hyvä ja tarkenna hakua</Typography> }
         })}</Grid> :

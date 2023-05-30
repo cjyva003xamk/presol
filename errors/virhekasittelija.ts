@@ -8,7 +8,6 @@ export class Virhe extends Error {
         this.status = status || 500;
         this.viesti = viesti || "Palvelimella tapahtui odottamaton virhe";
     }
-
 }
 
 const virhekasittelija = (err: Virhe, req: express.Request, res: express.Response, next: express.NextFunction) => {

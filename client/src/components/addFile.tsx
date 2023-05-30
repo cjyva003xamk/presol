@@ -1,21 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 
-interface Journey {
-    id: number
-    asiasanat?: string
-    ilmestymispaiva?: string
-    kaytonPaattyminen?: string
-    nimellisarvo?: number
-    merkinNimi?: string
-    merkinVari?: string
-    painopaikka?: string
-    painosmaara: number
-    taiteilija?: string
-    valuutta?: string
-    kuvanUrl?: string
-}
-
 const AddFile: React.FC = (): React.ReactElement => {
 
     const lomakeRef = useRef<any>();
@@ -28,7 +13,7 @@ const AddFile: React.FC = (): React.ReactElement => {
 
         setVirhe("");
         e.preventDefault();
-        if ( lomakeRef.current.files[0] ) {
+        if (lomakeRef.current.files[0]) {
 
             try {
 
@@ -42,16 +27,16 @@ const AddFile: React.FC = (): React.ReactElement => {
                 const yhteys = await fetch(url, options);
 
                 if (yhteys.status === 200) {
-                    setVirhe("Tiedosto lisätty");
+                    setVirhe("Tiedosto lisätty.");
                 } else {
-                    setVirhe("Tiedoston lisääminen epäonnistui");
+                    setVirhe("Tiedostoa ladataan, voit poistua sivulta.");
                 }
 
             } catch (e: any) {
                 setVirhe("Palvelimelle ei saada yhteyttä.")
             }
         } else {
-            setVirhe("Hakusanan tulee olla vähintään kaksi merkkiä pitkä.");
+            setVirhe("Ei sopivaa tiedostoa valittuna.");
         }
     }
 
